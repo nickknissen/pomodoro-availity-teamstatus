@@ -4,6 +4,8 @@ from time import sleep
 import requests
 import json
 import os
+import base64
+from datetime import datetime
 
 from dotenv import load_dotenv
 
@@ -63,6 +65,18 @@ if __name__ == "__main__":
     VENDOR_ID = 0x04d8 #lux 
     PRODUCT_STRING = "LUXAFOR POMO"
     TEAMS_WEB_AUTH_TOKEN = os.getenv("TEAMS_WEB_AUTH_TOKEN")
+
+    parts = TEAMS_WEB_AUTH_TOKEN.split(".")
+    payload = json.loads(base64.b64decode(parts[1]))
+    token_expires = payload['exp']
+
+    expires_at = datetime.fromtimestamp(token_expires)
+
+    if expires_at < datetime.now():
+        print("Auth token is expired")
+        exit()
+
+    
 
     device = None
     all_devices = hid.HidDeviceFilter(vendor_id = VENDOR_ID).get_devices()
